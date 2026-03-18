@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citroën Sales Consultant App</title>
+    <style>
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        :root {
+            --citroen-blue: #002D5B;
+            --citroen-red: #E30613;
+            --citroen-silver: #F0F2F5;
+            --text-dark: #333333;
+            --text-light: #777777;
+            --success: #28A745;
+            --warning: #FFC107;
+            --danger: #DC3545;
+            --border-radius: 12px;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            background: #f8f9fa;
+            color: var(--text-dark);
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
+        /* App Container */
+        .app-container {
+            max-width: 428px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0,0,0,0.1);
+        }
+        
+        /* Header Styles */
+        .header {
+            background: var(--citroen-blue);
+            color: white;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            height: 32px;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .notification-badge {
+            background: var(--citroen-red);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            max-width: 428px;
+            margin: 0 auto;
+            z-index: 100;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-light);
+            transition: var(--transition);
+            padding: 8px;
+            border-radius: 8px;
+        }
+        
+        .nav-item.active {
+            color: var(--citroen-blue);
+            background: var(--citroen-silver);
+        }
+        
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+        
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        /* Screen Container */
+        .screen {
+            display: none;
+            padding: 16px;
+            padding-bottom: 80px; /* Space for bottom nav */
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+        }
+        
+        .stat-card {
+            background: var(--citroen-silver);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--citroen-blue);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+        }
+        
+        .action-btn {
+            background: white;
+            border: 2px solid var(--citroen-silver);
+            border-radius: var(--border-radius);
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-dark);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+        
+        .action-btn:hover {
+            border-color: var(--citroen-blue);
+            transform: translateY(-2px);
+        }
+        
+        .action-icon {
+            font-size: 24px;
+            color: var(--citroen-blue);
+            margin-bottom: 8px;
+        }
+        
+        /* Lists */
+        .list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            text-decoration: none;
+            color: var(--text-dark);
+            cursor: pointer;
+        }
+        
+        .list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .lead-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-new { background: #e3f2fd; color: #1565c0; }
+        .status-followup { background: #fff3e0; color: #ef6c00; }
+        .status-converted { background: #e8f5e9; color: #2e7d32; }
+        
+        /* Forms */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--citroen-blue);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: var(--citroen-blue);
+            border: 2px solid var(--citroen-blue);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-block {
+            width: 100%;
+        }
+        
+        /* Task Item */
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            background: white;
+            border-radius: var(--border-radius);
+            margin-bottom: 8px;
+            border-left: 4px solid transparent;
+            cursor: pointer;
+        }
+        
+        .task-overdue {
+            border-left-color: var(--danger);
+        }
+        
+        .task-today {
+            border-left-color: var(--warning);
+        }
+        
+        .task-upcoming {
+            border-left-color: var(--success);
+        }
+        
+        /* Progress Bar */
+        .progress-container {
+            margin: 16px 0;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--citroen-blue);
+            border-radius: 4px;
+        }
+        
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 16px;
+        }
+        
+        .tab-btn {
+            padding: 12px 16px;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .tab-btn.active {
+            color: var(--citroen-blue);
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--citroen-blue);
+        }
+        
+        /* Calendar View */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+        }
+        
+        .calendar-day {
+            padding: 12px 4px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .calendar-day.active {
+            background: var(--citroen-blue);
+            color: white;
+        }
+        
+        /* Hidden Class */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Flow Navigation */
+        .flow-nav {
+            background: var(--citroen-silver);
+            padding: 12px 16px;
+            margin: -16px -16px 16px -16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .flow-back {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--citroen-blue);
+        }
+        
+        /* Test Drive Card */
+        .test-drive-card {
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        
+        .test-drive-card.upcoming {
+            border-color: var(--warning);
+        }
+        
+        .test-drive-card.completed {
+            border-color: var(--success);
+        }
+        
+        /* Quote Preview */
+        .quote-preview {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 16px;
+            border: 1px solid #ddd;
+        }
+        
+        .quote-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .quote-total {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--citroen-blue);
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 2px solid #ddd;
+        }
+        
+        /* Login Screen */
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 32px;
+            background: linear-gradient(135deg, var(--citroen-blue) 0%, #004080 100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+            transition: transform 0.5s ease;
+        }
+        
+        .login-container.logged-out {
+            transform: translateY(0);
+        }
+        
+        .login-container.logged-in {
+            transform: translateY(-100%);
+        }
+        
+        .login-logo {
+            height: 60px;
+            margin-bottom: 32px;
+        }
+        
+        .login-form {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 32px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        /* Animation for screen transitions */
+        .screen-transition {
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 428px) {
+            .app-container {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen (Initially visible) -->
+    <div class="login-container" id="loginScreen">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Citroen_Logo_2016.png/320px-Citroen_Logo_2016.png" alt="Citroën Logo" class="login-logo">
+        <div class="login-form">
+            <h2 style="text-align: center; margin-bottom: 24px; color: var(--citroen-blue);">Sales Consultant Portal</h2>
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-control" id="loginEmail" placeholder="consultant@citroen.in">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-control" id="loginPassword" placeholder="••••••••">
+            </div>
+            <button class="btn btn-primary btn-block" onclick="login()">Login</button>
+            <div style="text-align: center; margin-top: 16px;">
+                <a href="#" style="color: var(--citroen-blue); text-decoration: none;">Forgot Password?</a>
+            </div>
+            <div style="margin-top: 24px; text-align: center; color: var(--text-light); font-size: 14px;">
+                Secure login with Citroën India Salesforce
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App (Initially hidden) -->
+    <div class="app-container hidden" id="appContainer">
+        <!-- Header -->
+        <div class="header">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button class="flow-back" onclick="goBack()" id="backButton" style="display: none;">←</button>
+                <h3 id="screenTitle">Dashboard</h3>
+            </div>
+            <div class="header-actions">
+                <div style="position: relative;">
+                    <button onclick="showScreen('notifications')" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">
+                        🔔
+                        <span class="notification-badge">3</span>
+                    </button>
+                </div>
+                <button onclick="showScreen('profile')" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer;">
+                    👤
+                </button>
+            </div>
+        </div>
+
+        <!-- Flow Navigation (Hidden by default) -->
+        <div class="flow-nav hidden" id="flowNav">
+            <!-- Back button will be inserted here -->
+        </div>
+
+        <!-- Screens -->
+        <div class="screen active" id="dashboard">
+            <div class="card">
+                <h4>Welcome, Rajesh Kumar!</h4>
+                <p style="color: var(--text-light); margin-top: 4px;">Sales Consultant - Mumbai West</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Today's Leads</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">5</div>
+                    <div class="stat-label">Pending Tasks</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">₹18.4L</div>
+                    <div class="stat-label">Monthly Target</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">68%</div>
+                    <div class="stat-label">Achieved</div>
+                </div>
+            </div>
+            
+            <h4 style="margin: 16px 0 8px 0;">Quick Actions</h4>
+            <div class="quick-actions">
+                <a class="action-btn" onclick="showScreen('leadForm')">
+                    <div class="action-icon">＋</div>
+                    Add Lead
+                </a>
+                <a class="action-btn" onclick="showScreen('testDriveForm')">
+                    <div class="action-icon">🚗</div>
+                    Test Drive
+                </a>
+                <a class="action-btn" onclick="showScreen('quoteForm')">
+                    <div class="action-icon">📄</div>
+                    Create Quote
+                </a>
+            </div>
+            
+            <h4 style="margin: 24px 0 8px 0;">Today's Activity</h4>
+            <div class="card">
+                <div class="list-item" onclick="showScreen('leadDetail')">
+                    <div>
+                        <div>Follow up with Amit Sharma</div>
+                        <small style="color: var(--text-light);">10:30 AM | C3 Aircross</small>
+                    </div>
+                    <span class="lead-status status-followup">Pending</span>
+                </div>
+                <div class="list-item" onclick="showScreen('testDriveDetail')">
+                    <div>
+                        <div>Test Drive - Priya Patel</div>
+                        <small style="color: var(--text-light);">2:00 PM | ë-C3</small>
+                    </div>
+                    <span class="lead-status status-new">Scheduled</span>
+                </div>
+                <div class="list-item" onclick="showScreen('quoteForm')">
+                    <div>
+                        <div>Quote sent to Rohan Mehta</div>
+                        <small style="color: var(--text-light);">11:15 AM | C5 Aircross</small>
+                    </div>
+                    <span class="lead-status status-converted">Converted</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leads Screen -->
+        <div class="screen" id="leads">
+            <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                <input type="text" class="form-control" placeholder="Search leads..." style="flex: 1;">
+                <button class="btn btn-primary" onclick="showScreen('leadForm')">＋ Add</button>
+            </div>
+            
+            <div class="tab-nav">
+                <button class="tab-btn active" onclick="switchTab('all-leads')">All Leads</button>
+                <button class="tab-btn" onclick="switchTab('new-leads')">New</button>
+                <button class="tab-btn" onclick="switchTab('followup-leads')">Follow Up</button>
+            </div>
+            
+            <div id="all-leads" class="tab-content">
+                <div class="card">
+                    <a class="list-item" onclick="showScreen('leadDetail')">
+                        <div>
+                            <div>Amit Sharma</div>
+                            <small style="color: var(--text-light);">+91 98765 43210 | C3 Aircross</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <div>Follow up: Today</div>
+                            <span class="lead-status status-followup">Follow Up</span>
+                        </div>
+                    </a>
+                    <a class="list-item" onclick="showScreen('leadDetail')">
+                        <div>
+                            <div>Priya Patel</div>
+                            <small style="color: var(--text-light);">+91 98765 43211 | ë-C3</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <div>Test Drive: Today</div>
+                            <span class="lead-status status-new">New</span>
+                        </div>
+                    </a>
+                    <a class="list-item" onclick="showScreen('leadDetail')">
+                        <div>
+                            <div>Rohan Mehta</div>
+                            <small style="color: var(--text-light);">+91 98765 43212 | C5 Aircross</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <div>Quote Sent</div>
+                            <span class="lead-status status-converted">Converted</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tasks Screen -->
+        <div class="screen" id="tasks">
+            <div class="tab-nav">
+                <button class="tab-btn active" onclick="switchTaskTab('today')">Today</button>
+                <button class="tab-btn" onclick="switchTaskTab('overdue')">Overdue</button>
+                <button class="tab-btn" onclick="switchTaskTab('upcoming')">Upcoming</button>
+            </div>
+            
+            <div id="today-tasks" class="tab-content">
+                <div class="task-item task-today" onclick="showScreen('leadDetail')">
+                    <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                        <input type="checkbox" onclick="markTaskComplete(event)">
+                        <div>
+                            <div>Call Amit Sharma - Follow up</div>
+                            <small style="color: var(--text-light);">10:30 AM | Lead</small>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="showScreen('leadDetail'); event.stopPropagation();">View</button>
+                </div>
+                
+                <div class="task-item task-today" onclick="showScreen('testDriveDetail')">
+                    <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                        <input type="checkbox" onclick="markTaskComplete(event)">
+                        <div>
+                            <div>Test Drive with Priya Patel</div>
+                            <small style="color: var(--text-light);">2:00 PM | ë-C3 Demo</small>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="showScreen('testDriveDetail'); event.stopPropagation();">View</button>
+                </div>
+                
+                <div class="task-item task-overdue" onclick="showScreen('leadDetail')">
+                    <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                        <input type="checkbox" onclick="markTaskComplete(event)">
+                        <div>
+                            <div>Send brochure to Sanjay Gupta</div>
+                            <small style="color: var(--text-light);">Yesterday | C3 Aircross</small>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary" onclick="showScreen('leadDetail'); event.stopPropagation();">View</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quotes Screen -->
+        <div class="screen" id="quotes">
+            <div style="text-align: center; margin: 32px 0;">
+                <div style="font-size: 48px; color: var(--citroen-silver); margin-bottom: 16px;">📄</div>
+                <h4>Quote Management</h4>
+                <p style="color: var(--text-light); margin: 8px 0 16px 0;">Create and manage customer quotes</p>
+                <button class="btn btn-primary" onclick="showScreen('quoteForm')">Create New Quote</button>
+            </div>
+            
+            <div class="card">
+                <h4>Recent Quotes</h4>
+                <div class="list-item" onclick="showScreen('quoteForm')">
+                    <div>
+                        <div>Rohan Mehta - C5 Aircross</div>
+                        <small style="color: var(--text-light);">Quote #CT2024-0012 | ₹18,45,000</small>
+                    </div>
+                    <span class="lead-status status-converted">Approved</span>
+                </div>
+                <div class="list-item" onclick="showScreen('quoteForm')">
+                    <div>
+                        <div>Neha Singh - ë-C3</div>
+                        <small style="color: var(--text-light);">Quote #CT2024-0011 | ₹11,85,000</small>
+                    </div>
+                    <span class="lead-status status-followup">Pending</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Screen -->
+        <div class="screen" id="profile">
+            <div style="text-align: center; margin-bottom: 24px;">
+                <div style="width: 80px; height: 80px; background: var(--citroen-silver); border-radius: 50%; margin: 0 auto 16px auto; display: flex; align-items: center; justify-content: center; font-size: 32px;">
+                    👤
+                </div>
+                <h4>Rajesh Kumar</h4>
+                <p style="color: var(--text-light);">Sales Consultant</p>
+                <p>Mumbai West Dealership</p>
+            </div>
+            
+            <div class="card">
+                <h4 style="margin-bottom: 16px;">Performance</h4>
+                <div class="progress-container">
+                    <div>Monthly Target: ₹18.4L</div>
+                    <div style="display: flex; justify-content: space-between; margin: 8px 0;">
+                        <div>Achieved: ₹12.5L</div>
+                        <div>68%</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 68%;"></div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 16px;">
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                        <div>Leads Converted</div>
+                        <div style="font-weight: 700;">24</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                        <div>Test Drives</div>
+                        <div style="font-weight: 700;">18</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                        <div>Quote to Sale Ratio</div>
+                        <div style="font-weight: 700;">42%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h4 style="margin-bottom: 16px;">Settings</h4>
+                <div class="list-item" onclick="showScreen('notifications')">
+                    <div>🔔 Notifications</div>
+                    <div>→</div>
+                </div>
+                <div class="list-item" onclick="showScreen('targetSetting')">
+                    <div>🎯 Target Settings</div>
+                    <div>→</div>
+                </div>
+                <div class="list-item" onclick="showScreen('reports')">
+                    <div>📊 Reports</div>
+                    <div>→</div>
+                </div>
+                <div class="list-item" onclick="logout()">
+                    <div style="color: var(--danger);">🚪 Logout</div>
+                    <div>→</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lead Detail Screen -->
+        <div class="screen" id="leadDetail">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+                    <div>
+                        <h3>Amit Sharma</h3>
+                        <p style="color: var(--text-light);">Interested in C3 Aircross</p>
+                    </div>
+                    <span class="lead-status status-followup">Follow Up Required</span>
+                </div>
+                
+                <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+                    <button class="btn btn-primary" style="flex: 1;">📞 Call</button>
+                    <button class="btn btn-secondary" style="flex: 1;">✉️ Email</button>
+                    <button class="btn btn-secondary" style="flex: 1;">💬 WhatsApp</button>
+                </div>
+                
+                <div style="margin: 16px 0;">
+                    <h4>Contact Information</h4>
+                    <div style="margin-top: 8px;">
+                        <div>📱 +91 98765 43210</div>
+                        <div>✉️ amit.sharma@example.com</div>
+                        <div>📍 Mumbai, Andheri West</div>
+                    </div>
+                </div>
+                
+                <div style="margin: 16px 0;">
+                    <h4>Vehicle Preference</h4>
+                    <div style="margin-top: 8px;">
+                        <div>Model: C3 Aircross</div>
+                        <div>Variant: Shine 1.2 Turbo</div>
+                        <div>Color: Polar White</div>
+                        <div>Budget: ₹10-12 Lakhs</div>
+                    </div>
+                </div>
+                
+                <div style="margin: 16px 0;">
+                    <h4>Timeline</h4>
+                    <div style="margin-top: 8px; padding-left: 16px; border-left: 2px solid var(--citroen-silver);">
+                        <div style="margin-bottom: 12px;">
+                            <div style="font-weight: 500;">Initial Inquiry</div>
+                            <small style="color: var(--text-light);">2 days ago | Website</small>
+                        </div>
+                        <div style="margin-bottom: 12px;">
+                            <div style="font-weight: 500;">First Contact</div>
+                            <small style="color: var(--text-light);">Yesterday | Call - 10 mins</small>
+                        </div>
+                        <div>
+                            <div style="font-weight: 500;">Follow Up Scheduled</div>
+                            <small style="color: var(--text-light);">Today | 10:30 AM</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 24px;">
+                    <button class="btn btn-primary btn-block" onclick="showScreen('testDriveForm')">Schedule Test Drive</button>
+                    <button class="btn btn-secondary btn-block" style="margin-top: 8px;" onclick="showScreen('quoteForm')">Create Quote</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Drive Screens -->
+        <div class="screen" id="testDriveForm">
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">Schedule Test Drive</h3>
+                
+                <div class="form-group">
+                    <label class="form-label">Customer</label>
+                    <select class="form-control">
+                        <option>Amit Sharma</option>
+                        <option>Priya Patel</option>
+                        <option>Rohan Mehta</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Vehicle Model</label>
+                    <select class="form-control">
+                        <option>C3 Aircross</option>
+                        <option>ë-C3</option>
+                        <option>C5 Aircross</option>
+                        <option>C3</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Date & Time</label>
+                    <input type="datetime-local" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Test Drive Location</label>
+                    <select class="form-control">
+                        <option>Dealership</option>
+                        <option>Customer Location</option>
+                        <option>Office Location</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea class="form-control" rows="3" placeholder="Any special requirements..."></textarea>
+                </div>
+                
+                <button class="btn btn-primary btn-block" onclick="showScreen('testDriveDetail')">Schedule Test Drive</button>
+            </div>
+        </div>
+
+        <div class="screen" id="testDriveDetail">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+                    <div>
+                        <h3>Test Drive Scheduled</h3>
+                        <p style="color: var(--text-light);">Today, 2:00 PM</p>
+                    </div>
+                    <span class="lead-status status-new">Upcoming</span>
+                </div>
+                
+                <div class="test-drive-card upcoming">
+                    <h4>Priya Patel</h4>
+                    <p style="color: var(--text-light); margin: 8px 0;">📱 +91 98765 43211</p>
+                    
+                    <div style="margin: 16px 0;">
+                        <div style="font-weight: 500;">Vehicle: ë-C3</div>
+                        <div>Variant: You! Edition</div>
+                        <div>Color: Zesty Orange</div>
+                    </div>
+                    
+                    <div style="margin: 16px 0;">
+                        <div style="font-weight: 500;">📍 Location: Dealership</div>
+                        <div>📅 Date: Today, 2:00 PM</div>
+                        <div>⏱ Duration: 30 minutes scheduled</div>
+                    </div>
+                    
+                    <div style="margin-top: 16px;">
+                        <button class="btn btn-primary" style="width: 100%;">Start Test Drive Checklist</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quote Form -->
+        <div class="screen" id="quoteForm">
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">Create Quote</h3>
+                
+                <div class="form-group">
+                    <label class="form-label">Customer</label>
+                    <select class="form-control">
+                        <option>Amit Sharma</option>
+                        <option>Priya Patel</option>
+                        <option>Rohan Mehta</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Vehicle Model</label>
+                    <select class="form-control">
+                        <option>C3 Aircross</option>
+                        <option>ë-C3</option>
+                        <option>C5 Aircross</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Variant</label>
+                    <select class="form-control">
+                        <option>You! Edition</option>
+                        <option>Shine 1.2 Turbo</option>
+                        <option>Platinum</option>
+                    </select>
+                </div>
+                
+                <div class="quote-preview" style="margin: 16px 0;">
+                    <h4 style="margin-bottom: 16px;">Quote Summary</h4>
+                    
+                    <div class="quote-item">
+                        <div>Vehicle Base Price</div>
+                        <div>₹11,50,000</div>
+                    </div>
+                    
+                    <div class="quote-item">
+                        <div>Extended Warranty</div>
+                        <div>₹45,000</div>
+                    </div>
+                    
+                    <div class="quote-item">
+                        <div>Accessories Package</div>
+                        <div>₹25,000</div>
+                    </div>
+                    
+                    <div class="quote-item">
+                        <div>Insurance</div>
+                        <div>₹58,000</div>
+                    </div>
+                    
+                    <div class="quote-item">
+                        <div>Registration & Tax</div>
+                        <div>₹1,32,000</div>
+                    </div>
+                    
+                    <div class="quote-total">
+                        <div>Total On-Road Price</div>
+                        <div>₹13,50,000</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 16px;">
+                    <button class="btn btn-primary btn-block">Save & Send to Customer</button>
+                    <button class="btn btn-secondary btn-block" style="margin-top: 8px;">Save as Draft</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Screens -->
+        <div class="screen" id="notifications">
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">Notifications</h3>
+                
+                <div class="list-item">
+                    <div>
+                        <div style="font-weight: 500;">New Lead Assigned</div>
+                        <small style="color: var(--text-light);">Sanjay Gupta - C5 Aircross</small>
+                        <small style="color: var(--text-light); display: block;">10 minutes ago</small>
+                    </div>
+                </div>
+                
+                <div class="list-item">
+                    <div>
+                        <div style="font-weight: 500;">Test Drive Reminder</div>
+                        <small style="color: var(--text-light);">Priya Patel - ë-C3 at 2:00 PM</small>
+                        <small style="color: var(--text-light); display: block;">1 hour ago</small>
+                    </div>
+                </div>
+                
+                <div class="list-item">
+                    <div>
+                        <div style="font-weight: 500;">Target Achievement Alert</div>
+                        <small style="color: var(--text-light);">You've achieved 68% of monthly target</small>
+                        <small style="color: var(--text-light); display: block;">2 hours ago</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="targetSetting">
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">Target Settings</h3>
+                
+                <div style="margin-bottom: 24px;">
+                    <h4>Monthly Targets</h4>
+                    <div style="margin-top: 12px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <div>Vehicle Sales Target</div>
+                            <div>12 units</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <div>Revenue Target</div>
+                            <div>₹18.4L</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <div>Accessories Target</div>
+                            <div>₹1.5L</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4>Current Achievement</h4>
+                    <div class="progress-container" style="margin-top: 12px;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 68%;"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+                            <div>₹12.5L achieved</div>
+                            <div>68%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="reports">
+            <div class="card">
+                <h3 style="margin-bottom: 16px;">Reports & Analytics</h3>
+                
+                <div class="quick-actions">
+                    <a class="action-btn" onclick="showReport('daily')">
+                        <div class="action-icon">📅</div>
+                        Daily
+                    </a>
+                    <a class="action-btn" onclick="showReport('weekly')">
+                        <div class="action-icon">📊</div>
+                        Weekly
+                    </a>
+                    <a class="action-btn" onclick="showReport('monthly')">
+                        <div class="action-icon">📈</div>
+                        Monthly
+                    </a>
+                </div>
+                
+                <div style="margin-top: 24px;">
+                    <h4>Performance Metrics</h4>
+                    <div style="margin-top: 12px;">
+                        <div class="list-item">
+                            <div>Lead Conversion Rate</div>
+                            <div style="font-weight: 700;">24%</div>
+                        </div>
+                        <div class="list-item">
+                            <div>Test Drive to Sale Ratio</div>
+                            <div style="font-weight: 700;">42%</div>
+                        </div>
+                        <div class="list-item">
+                            <div>Average Deal Size</div>
+                            <div style="font-weight: 700;">₹12.8L</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <a class="nav-item active" onclick="showMainScreen('dashboard')">
+                <div class="nav-icon">📊</div>
+                <div class="nav-label">Dashboard</div>
+            </a>
+            <a class="nav-item" onclick="showMainScreen('leads')">
+                <div class="nav-icon">👥</div>
+                <div class="nav-label">Leads</div>
+            </a>
+            <a class="nav-item" onclick="showMainScreen('tasks')">
+                <div class="nav-icon">✅</div>
+                <div class="nav-label">Tasks</div>
+            </a>
+            <a class="nav-item" onclick="showMainScreen('quotes')">
+                <div class="nav-icon">📄</div>
+                <div class="nav-label">Quotes</div>
+            </a>
+            <a class="nav-item" onclick="showMainScreen('profile')">
+                <div class="nav-icon">👤</div>
+                <div class="nav-label">Profile</div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let currentScreen = 'dashboard';
+        let previousScreen = null;
+        let screenHistory = [];
+        
+        // Show main navigation screens
+        function showMainScreen(screenId) {
+            // Update navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Update back button visibility
+            document.getElementById('backButton').style.display = 'none';
+            document.getElementById('flowNav').classList.add('hidden');
+            
+            // Update screen title
+            const titles = {
+                dashboard: 'Dashboard',
+                leads: 'Leads',
+                tasks: 'Tasks',
+                quotes: 'Quotes',
+                profile: 'Profile'
+            };
+            document.getElementById('screenTitle').textContent = titles[screenId];
+            
+            // Show screen
+            showScreen(screenId);
+        }
+        
+        // Show any screen (with back navigation)
+        function showScreen(screenId) {
+            // Hide current screen
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Add to history if it's a different screen
+            if (screenId !== currentScreen) {
+                screenHistory.push(currentScreen);
+                currentScreen = screenId;
+            }
+            
+            // Show new screen
+            document.getElementById(screenId).classList.add('active');
+            
+            // Update back button for non-main screens
+            const mainScreens = ['dashboard', 'leads', 'tasks', 'quotes', 'profile'];
+            const showBackButton = !mainScreens.includes(screenId);
+            document.getElementById('backButton').style.display = showBackButton ? 'block' : 'none';
+            
+            // Update flow navigation
+            if (showBackButton) {
+                document.getElementById('flowNav').classList.remove('hidden');
+            } else {
+                document.getElementById('flowNav').classList.add('hidden');
+            }
+            
+            // Update screen title
+            const titles = {
+                dashboard: 'Dashboard',
+                leads: 'Leads',
+                tasks: 'Tasks',
+                quotes: 'Quotes',
+                profile: 'My Profile',
+                leadDetail: 'Lead Details',
+                testDriveForm: 'Schedule Test Drive',
+                testDriveDetail: 'Test Drive Details',
+                quoteForm: 'Create Quote',
+                notifications: 'Notifications',
+                targetSetting: 'Target Settings',
+                reports: 'Reports'
+            };
+            
+            if (titles[screenId]) {
+                document.getElementById('screenTitle').textContent = titles[screenId];
+            }
+            
+            // Add animation
+            document.getElementById(screenId).classList.add('screen-transition');
+            setTimeout(() => {
+                document.getElementById(screenId).classList.remove('screen-transition');
+            }, 300);
+        }
+        
+        // Go back to previous screen
+        function goBack() {
+            if (screenHistory.length > 0) {
+                const previous = screenHistory.pop();
+                showScreen(previous);
+            }
+        }
+        
+        // Login function - now removes login screen completely
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (email && password) {
+                // Add animation class to slide out login screen
+                const loginScreen = document.getElementById('loginScreen');
+                loginScreen.classList.add('logged-in');
+                
+                // Show app container
+                setTimeout(() => {
+                    document.getElementById('appContainer').classList.remove('hidden');
+                    showMainScreen('dashboard');
+                    
+                    // Remove login screen from DOM after animation completes
+                    setTimeout(() => {
+                        loginScreen.style.display = 'none';
+                    }, 500);
+                }, 300);
+            } else {
+                alert('Please enter email and password');
+            }
+        }
+        
+        // Logout function - brings back login screen
+        function logout() {
+            // Show login screen with animation
+            const loginScreen = document.getElementById('loginScreen');
+            loginScreen.style.display = 'flex';
+            
+            setTimeout(() => {
+                loginScreen.classList.remove('logged-in');
+                loginScreen.classList.add('logged-out');
+                
+                // Hide app container
+                document.getElementById('appContainer').classList.add('hidden');
+                
+                // Clear form fields
+                document.getElementById('loginEmail').value = '';
+                document.getElementById('loginPassword').value = '';
+                
+                // Reset screen history
+                screenHistory = [];
+                currentScreen = 'dashboard';
+            }, 100);
+        }
+        
+        // Switch tabs in leads screen
+        function switchTab(tabId) {
+            // Update active tab button
+            document.querySelectorAll('#leads .tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Here you would load the appropriate leads for the tab
+            console.log('Switched to tab:', tabId);
+        }
+        
+        // Switch task tabs
+        function switchTaskTab(tabId) {
+            // Update active tab button
+            document.querySelectorAll('#tasks .tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Here you would load the appropriate tasks for the tab
+            console.log('Switched to task tab:', tabId);
+        }
+        
+        // Mark task as complete
+        function markTaskComplete(event) {
+            event.stopPropagation(); // Prevent triggering parent click
+            const checkbox = event.target;
+            const taskItem = checkbox.closest('.task-item');
+            if (checkbox.checked) {
+                taskItem.style.opacity = '0.6';
+                taskItem.style.textDecoration = 'line-through';
+                
+                // Show success message
+                setTimeout(() => {
+                    alert('Task marked as complete!');
+                }, 300);
+            }
+        }
+        
+        // Show report
+        function showReport(type) {
+            alert(`Loading ${type} report...\n\nThis would show detailed analytics for the ${type} period with visual charts and export options.`);
+        }
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Pre-fill login for easier testing
+            document.getElementById('loginEmail').value = 'consultant@citroen.in';
+            document.getElementById('loginPassword').value = 'Citroen@123';
+        });
+    </script>
+</body>
+</html>
