@@ -26,8 +26,6 @@ The portal is hosted on **GitHub Pages**.
 ## 🖱️ How to Use
 
 1. **Login**: Use the demo credentials to access the portal.
-   - **Email**: `consultant@citroen.in`
-   - **Password**: `Citroen@123`
 2. **Dashboard**: Navigate through the core features using the bottom navigation bar.
 3. **Leads**: Add new leads or view existing customer details.
 4. **Tasks**: Check your daily agenda and mark tasks as complete.
